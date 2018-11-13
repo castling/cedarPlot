@@ -1,0 +1,46 @@
+import Promise from 'promise'
+import GIF from 'gif.js'
+
+import workerCode from 'raw-loader!gif.js/dist/gif.worker.js'
+
+
+export default class gifEncoder {
+  constructor(opts) {
+    var blob = new Blob([ workerCode ], { type: "text/javascript" })
+    var worker = URL.createObjectURL(blob)
+
+    this.video = new GIF({
+      workerScript: worker,
+      workers: Math.min( opts.cpu || 4, navigator.hardwareConcurrency || 4 ),
+      quality: opts.quality,
+      repeat: opts.repeat || true,
+debug: true,
+    })
+    this.delay = 1000 / opts.framerate
+  }
+
+  add(canvas) {
+    this.video.addFrame(canvas,{
+      delay: this.delay,
+      copy: true,
+    })
+  }
+
+  save() {
+    return new Promise((resolve,reject) => {
+      this.video.on('finished',blob => {
+console.log('finished')
+        resolve(blob)
+      })
+console.log('render')
+      this.video.render()
+    })
+  }
+
+  convert(blob) {
+    return Promise.resolve(blob)
+  }
+
+  cancel() {
+  }
+}

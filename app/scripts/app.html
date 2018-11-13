@@ -1,0 +1,198 @@
+  <el-container class="app-container">
+    <div class="menu-window">
+      <switch-set
+        class="switch-set"
+        :options.sync="options"
+        :layouts="layout"
+        :styles="style"
+        :initialized="initialized"
+        :play.sync="animation"
+        :class="[showSwitchSet ? 'show' : 'hide']"
+        @step="setTimeStep($event)"
+        @save-image="openSaveImageModal"
+        @save-movie="openSaveMovieModal"
+        :cameras="cameraSettings"
+        @save-camera="saveCameraSetting"
+        @load-camera="loadCameraSetting"
+        @remove-camera="removeCameraSetting"
+      ></switch-set>
+      <slide-controller v-model="showSwitchSet" mode="vertical"></slide-controller>
+    </div>
+
+    <el-container class="main-window">
+      <transition name="fade">
+        <div class="backdrop" v-if="loadingState.run">
+          <el-progress type="circle"
+            :status="loadingState.status"
+            :percentage="loadingState.percentage"></el-progress>
+        </div>
+      </transition>
+
+      <transition name="fade">
+        <div class="backdrop" v-if="modalType" @click.prevent.stop.self="modalType=null">
+
+          <div class="modal" v-if="modalType==='changeColor'">
+            <div class="modal__header">
+              SET {{colorParam.name}} COLOR
+            </div>
+            <div class="modal__body">
+              <sketch-picker
+                :value="colorParam.color"
+                :preset-colors="presetColors"
+                :disable-alpha="true"
+                @input="changeColor"
+                >
+              </sketch-picker>
+            </div>
+            <div class="modal__footer">
+              <el-button type="primary" @click="updateColor">CHANGE COLOR</el-button>
+              <el-button @click="modalType=null">CANCEL</el-button>
+            </div>
+          </div>
+
+          <div class="modal save-image-modal" v-if="modalType==='saveImage'">
+            <div class="modal__header">
+              SAVE AS IMAGE
+            </div>
+            <div class="modal__body">
+              <el-form :model="saveImageParam" :rules="saveImageRules" label-width="150px" >
+                <el-form-item label="file name">
+                  <el-input v-model="saveImageParam.filename"></el-input>
+                </el-form-item>
+                <el-form-item label="image width">
+                  <el-input-number v-model="saveImageParam.width" :controls="false"></el-input-number>
+                </el-form-item>
+                <el-form-item label="image height">
+                  <el-input-number v-model="saveImageParam.height" :controls="false"></el-input-number>
+                </el-form-item>
+                <el-form-item label="image type">
+                  <el-select v-model="saveImageParam.format">
+                    <el-option v-for="(format,key) in saveImageFormats" :key="key"
+                      :label="format.name" :value="key"></el-option>
+                  </el-select>
+                </el-form-item>
+              </el-form>
+            </div>
+            <div class="modal__footer">
+              <el-button type="primary" @click="saveImage">SAVE</el-button>
+              <el-button @click="modalType=null">CANCEL</el-button>
+            </div>
+          </div>
+
+          <save-movie-modal class="modal save-movie-modal" v-if="modalType==='saveMovie'"
+            :param.sync="saveMovieParam"
+            :maxStep="options.time.max"
+            :formats="saveMovieFormats"
+            @save="saveMovie"
+            @cancel="modalType=null"
+            >
+          </save-movie-modal>
+<!--
+          <div class="modal save-movie-modal" v-if="modalType==='saveMovie'">
+            <div class="modal__header">
+              SAVE AS MOVIE
+            </div>
+            <div class="modal__body">
+              <el-form :model="saveMovieParam" :rules="saveMovieRules" label-width="150px" >
+                <el-form-item label="file name">
+                  <el-input v-model="saveMovieParam.filename"></el-input>
+                </el-form-item>
+                <el-form-item label="start step">
+                  <el-input-number v-model="saveMovieParam.startStep" :controls="false"
+                    :min="0" :max="saveMovieParam.endStep-1"></el-input-number>
+                </el-form-item>
+                <el-form-item label="end step">
+                  <el-input-number v-model="saveMovieParam.endStep" :controls="false"
+                    :min="saveMovieParam.startStep+1" :max="options.time.max"></el-input-number>
+                </el-form-item>
+                <el-form-item label="movie width">
+                  <el-input-number v-model="saveMovieParam.width" :controls="false" :min="0"></el-input-number>
+                </el-form-item>
+                <el-form-item label="movie height">
+                  <el-input-number v-model="saveMovieParam.height" :controls="false" :min="0"></el-input-number>
+                </el-form-item>
+                <el-form-item label="movie type">
+                  <el-select v-model="saveMovieParam.format">
+                    <el-option v-for="(format,key) in saveMovieFormats" :key="key"
+                      :label="format.name" :value="key"></el-option>
+                  </el-select>
+                </el-form-item>
+                <el-form-item label="frame rate">
+                  <el-input-number v-model="saveMovieParam.framerate" :controls="false" :min="0"></el-input-number>
+                </el-form-item>
+                <el-form-item label="movie quality">
+                  <el-input-number v-model="saveMovieParam.quality" :controls="false" :min="0" :max="100"
+                    :disabled="!saveMovieFormats[saveMovieParam.format].quality"
+                    ></el-input-number>
+                </el-form-item>
+              </el-form>
+            </div>
+            <div class="modal__footer">
+              <el-button type="primary" @click="saveMovie">SAVE</el-button>
+              <el-button @click="modalType=null">CANCEL</el-button>
+            </div>
+          </div>
+-->
+
+        </div>
+      </transition>
+
+      <el-header class="header-menu" height="auto">
+<!--
+        <div>
+          {{options}}
+        </div>
+-->
+        <div class="header-selector"
+            :class="[showFileSelector ? 'show' : 'hide']">
+<!--
+            v-if="showFileSelector">
+-->
+          <el-upload
+            class="file-selector__uploader"
+            action=""
+            ref="upload"
+            :multiple="false"
+            :show-file-list="true"
+            :auto-upload="false"
+            :on-change="setDatafile"
+            >
+            <el-button type="primary">Select Data File</el-button>
+          </el-upload>
+          <div class="form-control">
+            <el-input-number v-model="options.columns.x"
+              :min="0" :max="options.maxColumns" controls-position="right">
+            </el-input-number>
+            <label class="form-label">X Column</label>
+          </div>
+          <div class="form-control">
+            <el-input-number v-model="options.columns.y" label="Y Column"
+              :min="0" :max="options.maxColumns" controls-position="right">
+            </el-input-number>
+            <label class="form-label">Y Column</label>
+          </div>
+          <div class="form-control">
+            <el-input-number v-model="options.columns.z" label="Z Column"
+              :min="0" :max="options.maxColumns" controls-position="right">
+            </el-input-number>
+            <label class="form-label">Z Column</label>
+          </div>
+          <div class="form-control">
+            <el-input-number v-model="options.columns.v" label="Value Column"
+              :min="0" :max="options.maxColumns" controls-position="right">
+            </el-input-number>
+            <label class="form-label">Value Column</label>
+          </div>
+        </div>
+
+        <slide-controller v-model="showFileSelector"></slide-controller>
+
+      </el-header>
+
+      <el-main id="canvas"
+        v-resize:debounce.50="resizeHandler">
+      </el-main>
+
+    </el-container>
+
+  </el-container>

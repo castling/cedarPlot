@@ -1,0 +1,116 @@
+<template>
+  <div class="app-container">
+    <switch-set class="switch-set" :options.sync="options"></switch-set>
+
+    <div class="main-window">
+      <div class="file-selector">
+        <el-upload
+          action=""
+          :multiple="false"
+          :show-file-list="false"
+          :auto-upload="false"
+          :on-change="setDatafile"
+          >
+          <el-button size="small" type="primary">Select Data File</el-button>
+        </el-upload>
+      </div>
+
+      <div class="canvas"></div>
+    </div>
+  </div>
+</template>
+
+<style src="element-ui/lib/theme-chalk/button.css"></style>
+<style src="element-ui/lib/theme-chalk/upload.css"></style>
+<style scoped lang="scss">
+  .app-container {
+    position: relative;
+    height: 100%;
+    width: 100%;
+    display: flex;
+    flex-direction: row;
+
+    .switch-set {
+      flex-grow: 0;
+      flex-shrink: 0;
+    }
+    .main-window {
+      flex-grow: 1;
+      flex-shrink: 1;
+      width: 100%;
+
+      display: flex;
+      flex-direction: column;
+
+      .file-selector {
+        flex-grow: 0;
+        flex-shrink: 0;
+      }
+      .canvas {
+        flex-grow: 1;
+        flex-shrink: 1;
+        height: 100%;
+      }
+    }
+
+  }
+</style>
+
+<script>
+import Plotly from 'ify-loader!plotly.js/dist/plotly.min.js'
+import ElUpload from 'element-ui/lib/upload.js'
+import ElButton from 'element-ui/lib/button.js'
+import SwitchSet from './switchSet.vue'
+
+export default {
+  data() {
+    return {
+      traces: [],
+      options: {},
+      layout: {
+        margin: {
+          l: 0,
+          r: 0,
+          t: 0,
+          b: 0,
+        },
+        /**
+        x: { scale: 1 },
+        y: { scale: 1 },
+        z: { scale: 1 },
+        */
+        dragmode: 'orbit',
+        legend: {
+          y: 0.5,
+          yref: 'paper',
+        },
+        scene: {
+          aspectmode: 'cube',
+          camera: {
+            center: null,
+            eye: null,
+            up: null,
+          },
+        },
+      },
+    }
+  },
+  components: {
+    ElUpload,
+    ElButton,
+    SwitchSet,
+  },
+  mounted() {
+    this.init()
+  },
+  methods: {
+    init() {
+      this.canvas = this.$el.querySelector('.canvas')
+      Plotly.newPlot(this.canvas,this.traces,this.layout);
+    },
+    setDatafile(file) {
+console.log(file)
+    },
+  },
+}
+</script>
