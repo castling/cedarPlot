@@ -14,7 +14,7 @@
 importScripts("https://storage.googleapis.com/workbox-cdn/releases/3.6.3/workbox-sw.js");
 
 importScripts(
-  "./precache-manifest.ed9ed6ccb817d4c4020024e57c1e05b0.js"
+  "./precache-manifest.1f34933927113c03d0ce7a7163cd93fa.js"
 );
 
 workbox.core.setCacheNameDetails({prefix: "cedar-plot"});
@@ -30,5 +30,3 @@ workbox.clientsClaim();
 self.__precacheManifest = [].concat(self.__precacheManifest || []);
 workbox.precaching.suppressWarnings();
 workbox.precaching.precacheAndRoute(self.__precacheManifest, {});
-
-workbox.routing.registerRoute(/\//, workbox.strategies.staleWhileRevalidate(), 'GET');

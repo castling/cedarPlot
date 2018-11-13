@@ -28,7 +28,7 @@ self.__precacheManifest = [
     "url": "./scripts/whammy.bundle.js"
   },
   {
-    "revision": "7618afaddfc36a4c4035",
+    "revision": "58470741f5d7267fee1d",
     "url": "./scripts/app.js"
   },
   {
@@ -100,12 +100,12 @@ self.__precacheManifest = [
     "url": "./favicons/apple-touch-icon-144x144-precomposed.png"
   },
   {
-    "revision": "4b043d7c5150eadaf6ee34efe8c03343",
-    "url": "./favicons/apple-touch-icon-152x152-precomposed.png"
-  },
-  {
     "revision": "607dee8e0a8f134013f4aa987eb93a28",
     "url": "./favicons/apple-touch-icon-144x144.png"
+  },
+  {
+    "revision": "4b043d7c5150eadaf6ee34efe8c03343",
+    "url": "./favicons/apple-touch-icon-152x152-precomposed.png"
   },
   {
     "revision": "4b043d7c5150eadaf6ee34efe8c03343",
@@ -208,20 +208,20 @@ self.__precacheManifest = [
     "url": "./favicons/icon-36x36.png"
   },
   {
-    "revision": "7075ebb26c8c499adf4d5a43eb735012",
-    "url": "./favicons/icon-384x384.png"
-  },
-  {
     "revision": "30af9042d87da472bb4bd47af9e39eca",
     "url": "./favicons/icon-48x48.png"
   },
   {
-    "revision": "d37ef76f78eab6999de689d56217611e",
-    "url": "./favicons/icon-512x512.png"
+    "revision": "7075ebb26c8c499adf4d5a43eb735012",
+    "url": "./favicons/icon-384x384.png"
   },
   {
     "revision": "fca141a05362b7065e3c35441c380ad3",
     "url": "./favicons/icon-72x72.png"
+  },
+  {
+    "revision": "d37ef76f78eab6999de689d56217611e",
+    "url": "./favicons/icon-512x512.png"
   },
   {
     "revision": "fbfb12f73d62df1bfcc08cd16e09bfa0",
