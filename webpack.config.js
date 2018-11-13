@@ -143,19 +143,19 @@ if( isProd ) {
       },
       icons: [
         {
-          src: path.resolve('app/favicon/favicon_1024x1024.png'),
+          src: path.resolve('app/favicon/favicon.png'),
           sizes: [120, 152, 167, 180, 1024],
           destination: path.join('icons', 'ios'),
           ios: true
         },
         {
-          src: path.resolve('app/favicon/favicon_1024x1024.png'),
+          src: path.resolve('app/favicon/favicon.png'),
           size: 1024,
           destination: path.join('icons', 'ios'),
           ios: 'startup'
         },
         {
-          src: path.resolve('app/favicon/favicon_1024x1024.png'),
+          src: path.resolve('app/favicon/favicon.png'),
           sizes: [36, 48, 72, 96, 144, 192, 512, 1024],
           destination: path.join('icons', 'android')
         },

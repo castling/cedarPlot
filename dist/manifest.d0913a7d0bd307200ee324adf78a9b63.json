@@ -1,72 +1,72 @@
 {
   "icons": [
     {
-      "src": "./icons/android/icon_1024x1024.6b63268f3b08dd0f84e19a3c664b6e81.png",
+      "src": "./icons/android/icon_1024x1024.b6709050c10a4d0728e900222f7e87d2.png",
       "sizes": "1024x1024",
       "type": "image/png"
     },
     {
-      "src": "./icons/android/icon_512x512.b11ffe5f2a3251c1be5c3afb43b7369a.png",
+      "src": "./icons/android/icon_512x512.ed624ddaedf7518ab10b685d0f83a5e7.png",
       "sizes": "512x512",
       "type": "image/png"
     },
     {
-      "src": "./icons/android/icon_192x192.8ee834a5c34c6199eefc988d7f4013ee.png",
+      "src": "./icons/android/icon_192x192.cbc0a87fe771098f28e5b923e74e2c53.png",
       "sizes": "192x192",
       "type": "image/png"
     },
     {
-      "src": "./icons/android/icon_144x144.8cae49b362009ea50c9c78a6b4d01670.png",
+      "src": "./icons/android/icon_144x144.560b5525da597ebef17a2cf12bc85282.png",
       "sizes": "144x144",
       "type": "image/png"
     },
     {
-      "src": "./icons/android/icon_96x96.221ec3ad88f45c74350b2b3b1dd65c2b.png",
+      "src": "./icons/android/icon_96x96.f4ae195430fadba3dc012d90e45eecd4.png",
       "sizes": "96x96",
       "type": "image/png"
     },
     {
-      "src": "./icons/android/icon_72x72.4af7710d5aefd775ff6bfca0d33a5034.png",
+      "src": "./icons/android/icon_72x72.af9f1eba63ab3726cfeea36d786b4ac6.png",
       "sizes": "72x72",
       "type": "image/png"
     },
     {
-      "src": "./icons/android/icon_48x48.dc9610b5d029dc75e5a91db5852d6d63.png",
+      "src": "./icons/android/icon_48x48.efb4528d300a1229db9f340d4257abd6.png",
       "sizes": "48x48",
       "type": "image/png"
     },
     {
-      "src": "./icons/android/icon_36x36.86222d2891e35cea6a1099927fd62717.png",
+      "src": "./icons/android/icon_36x36.5ee6add716a01f23fb43bed79b0efeb1.png",
       "sizes": "36x36",
       "type": "image/png"
     },
     {
-      "src": "./icons/ios/icon_1024x1024.6b63268f3b08dd0f84e19a3c664b6e81.png",
+      "src": "./icons/ios/icon_1024x1024.b6709050c10a4d0728e900222f7e87d2.png",
       "sizes": "1024x1024",
       "type": "image/png"
     },
     {
-      "src": "./icons/ios/icon_1024x1024.6b63268f3b08dd0f84e19a3c664b6e81.png",
+      "src": "./icons/ios/icon_1024x1024.b6709050c10a4d0728e900222f7e87d2.png",
       "sizes": "1024x1024",
       "type": "image/png"
     },
     {
-      "src": "./icons/ios/icon_180x180.26a9856e59fbc3c4c53c945200e94ac6.png",
+      "src": "./icons/ios/icon_180x180.7c6a90df56bb6c8adc37b211e6cf6b97.png",
       "sizes": "180x180",
       "type": "image/png"
     },
     {
-      "src": "./icons/ios/icon_167x167.1e85fca47a0d1f8a7c34d7ef17aa1d28.png",
+      "src": "./icons/ios/icon_167x167.b9cf93baccf32d8059b1fb75312bce7e.png",
       "sizes": "167x167",
       "type": "image/png"
     },
     {
-      "src": "./icons/ios/icon_152x152.1c6f72ad742809e8089a22bcd6420e22.png",
+      "src": "./icons/ios/icon_152x152.9da9023907f6f3b639fd0d54833933c5.png",
       "sizes": "152x152",
       "type": "image/png"
     },
     {
-      "src": "./icons/ios/icon_120x120.bfc1d467eb1bf5779f7c31080f11bec2.png",
+      "src": "./icons/ios/icon_120x120.2cd6c6520c9a042a69408011ffe3e7f5.png",
       "sizes": "120x120",
       "type": "image/png"
     }
