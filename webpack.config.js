@@ -129,7 +129,7 @@ if( isProd ) {
     ]),
     new workboxPlugin.GenerateSW({
       cacheId: 'cedar-plot',
-      swDest: 'scripts/sw.js',
+      swDest: 'sw.js',
       clientsClaim: true,
       skipWaiting: true,
       runtimeCaching: [
