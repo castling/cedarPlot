@@ -28,7 +28,7 @@ self.__precacheManifest = [
     "url": "./scripts/whammy.bundle.js"
   },
   {
-    "revision": "58470741f5d7267fee1d",
+    "revision": "c3add102285084964f3e",
     "url": "./scripts/app.js"
   },
   {
@@ -60,12 +60,12 @@ self.__precacheManifest = [
     "url": "./favicons/android-chrome-36x36.png"
   },
   {
-    "revision": "7075ebb26c8c499adf4d5a43eb735012",
-    "url": "./favicons/android-chrome-384x384.png"
-  },
-  {
     "revision": "30af9042d87da472bb4bd47af9e39eca",
     "url": "./favicons/android-chrome-48x48.png"
+  },
+  {
+    "revision": "7075ebb26c8c499adf4d5a43eb735012",
+    "url": "./favicons/android-chrome-384x384.png"
   },
   {
     "revision": "d37ef76f78eab6999de689d56217611e",
@@ -216,12 +216,12 @@ self.__precacheManifest = [
     "url": "./favicons/icon-384x384.png"
   },
   {
-    "revision": "fca141a05362b7065e3c35441c380ad3",
-    "url": "./favicons/icon-72x72.png"
-  },
-  {
     "revision": "d37ef76f78eab6999de689d56217611e",
     "url": "./favicons/icon-512x512.png"
+  },
+  {
+    "revision": "fca141a05362b7065e3c35441c380ad3",
+    "url": "./favicons/icon-72x72.png"
   },
   {
     "revision": "fbfb12f73d62df1bfcc08cd16e09bfa0",
