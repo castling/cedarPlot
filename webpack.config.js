@@ -6,6 +6,8 @@ const { BundleAnalyzerPlugin } = require('webpack-bundle-analyzer')
 const VueLoaderPlugin = require('vue-loader/lib/plugin');
 const workboxPlugin = require('workbox-webpack-plugin');
 const LodashModuleReplacementPlugin = require('lodash-webpack-plugin');
+const WebpackPwaManifest = require('webpack-pwa-manifest')
+let FaviconsWebpackPlugin = require('favicons-webpack-plugin')
 
 var ENV = process.env.npm_lifecycle_event;
 var isTest = ENV === 'test' || ENV === 'test-watch';
@@ -127,20 +129,72 @@ if( isProd ) {
       },
 */
     ]),
+    new WebpackPwaManifest({
+      name: 'cedarPlot',
+      short_name: 'cedarPlot',
+      description: 'particle plot application',
+      theme_color: '#6f6f6f',
+      background_color: '#29b63c',
+      display: 'standalone',
+      inject: true,
+      ios: {
+        'apple-mobile-web-app-title': 'cedarPlot',
+        'apple-mobile-web-app-status-bar-style': 'black'
+      },
+      icons: [
+        {
+          src: path.resolve('app/favicon/favicon_1024x1024.png'),
+          sizes: [120, 152, 167, 180, 1024],
+          destination: path.join('icons', 'ios'),
+          ios: true
+        },
+        {
+          src: path.resolve('app/favicon/favicon_1024x1024.png'),
+          size: 1024,
+          destination: path.join('icons', 'ios'),
+          ios: 'startup'
+        },
+        {
+          src: path.resolve('app/favicon/favicon_1024x1024.png'),
+          sizes: [36, 48, 72, 96, 144, 192, 512, 1024],
+          destination: path.join('icons', 'android')
+        },
+      ],
+    }),
+    new FaviconsWebpackPlugin({
+      logo: path.resolve(__dirname,'app/favicon/favicon.png'),
+      prefix: 'icons-[hash]/',
+      icons: {
+        android: false,
+        appleIcon: false,
+        appleStartup: false,
+        coast: false,
+        favicons: true,
+        firefox: true,
+        opengraph: false,
+        twitter: false,
+        yandex: false,
+        windows: false
+      },
+    }),
     new workboxPlugin.GenerateSW({
       cacheId: 'cedar-plot',
       swDest: 'sw.js',
-      globDirectory: '.',
-      globPatterns: ['**/*.{js,css,html,png,jpg,svg,ico}'],
+      globDirectory: 'dist',
+      globPatterns: [
+        '**/*.{js,css,html}',
+        '**/*.{png,jpg,svg,ico}',
+        'manifest.*.json',
+      ],
       clientsClaim: true,
       skipWaiting: true,
-      /*
       runtimeCaching: [
         {
           urlPattern: new RegExp('/'),
           handler: 'staleWhileRevalidate',
         },
       ]
+      /*
       */
     }),
   ]);
