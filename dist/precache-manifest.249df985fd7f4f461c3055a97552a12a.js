@@ -208,12 +208,12 @@ self.__precacheManifest = [
     "url": "./favicons/icon-36x36.png"
   },
   {
-    "revision": "30af9042d87da472bb4bd47af9e39eca",
-    "url": "./favicons/icon-48x48.png"
-  },
-  {
     "revision": "7075ebb26c8c499adf4d5a43eb735012",
     "url": "./favicons/icon-384x384.png"
+  },
+  {
+    "revision": "30af9042d87da472bb4bd47af9e39eca",
+    "url": "./favicons/icon-48x48.png"
   },
   {
     "revision": "d37ef76f78eab6999de689d56217611e",

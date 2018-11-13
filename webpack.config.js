@@ -130,6 +130,8 @@ if( isProd ) {
     new workboxPlugin.GenerateSW({
       cacheId: 'cedar-plot',
       swDest: 'sw.js',
+      globDirectory: '.',
+      globPatterns: ['**/*.{js,css,html,png,jpg,svg,ico}'],
       clientsClaim: true,
       skipWaiting: true,
       /*
