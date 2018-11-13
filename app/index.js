@@ -11,7 +11,7 @@ if ('serviceWorker' in navigator) {
 }
 if (process.env.NODE_ENV === 'production' && 'serviceWorker' in navigator) {
   window.addEventListener('load', () => {
-    navigator.serviceWorker.register('./scripts/sw.js')
+    navigator.serviceWorker.register('./sw.js')
   })
 }
 

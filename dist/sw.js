@@ -14,7 +14,7 @@
 importScripts("https://storage.googleapis.com/workbox-cdn/releases/3.6.3/workbox-sw.js");
 
 importScripts(
-  "./precache-manifest.8641987b4b178a38fb8a99ecb5c87b6a.js"
+  "./precache-manifest.451aed777f7cf68cfbaafd0bc740a9f3.js"
 );
 
 workbox.core.setCacheNameDetails({prefix: "cedar-plot"});
