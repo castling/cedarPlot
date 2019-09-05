@@ -1,0 +1,148 @@
+# Using distributed files
+
+All plotly.js dist bundles inject an object `Plotly` into the global scope.
+
+Import plotly.js as:
+
+```html
+<script src="plotly.min.js"></script>
+```
+
+or the un-minified version as:
+
+```html
+<script src="plotly.js" charset="utf-8"></script>
+```
+
+### To support IE9
+
+*Before* the plotly.js script tag, add:
+
+```html
+<script>if(typeof window.Int16Array !== 'function')document.write("<scri"+"pt src='extras/typedarray.min.js'></scr"+"ipt>");</script>
+<script>document.write("<scri"+"pt src='extras/request_animation_frame.js'></scr"+"ipt>");</script>
+```
+
+### To support MathJax
+
+*Before* the plotly.js script tag, add:
+
+```html
+<script src="mathjax/MathJax.js?config=TeX-AMS-MML_SVG"></script>
+```
+
+You can grab the relevant MathJax files in `./dist/extras/mathjax/`.
+
+By default, plotly.js will modify the global MathJax configuration on load.
+This can lead to undesirable behavior if plotly.js is loaded alongside
+other libraries that also rely on MathJax. To disable this global configuration
+process, set the `MathJaxConfig` property to `'local'` in the `window.PlotlyConfig`
+object.  This property must be set before the plotly.js script tag, for example:
+
+```html
+<script>
+   window.PlotlyConfig = {MathJaxConfig: 'local'}
+</script>
+<script src="plotly.min.js"></script>
+```
+
+### To include localization
+
+Plotly.js defaults to US English (en-US) and includes British English (en) in the standard bundle.
+Many other localizations are available - here is an example using Swiss-German (de-CH),
+see the contents of this directory for the full list.
+They are also available on our CDN as https://cdn.plot.ly/plotly-locale-de-ch-latest.js OR https://cdn.plot.ly/plotly-locale-de-ch-1.43.2.js
+Note that the file names are all lowercase, even though the region is uppercase when you apply a locale.
+
+*After* the plotly.js script tag, add:
+
+```html
+<script src="plotly-locale-de-ch.js"></script>
+<script>Plotly.setPlotConfig({locale: 'de-CH'})</script>
+```
+
+The first line loads and registers the locale definition with plotly.js, the second sets it as the default for all Plotly plots.
+You can also include multiple locale definitions and apply them to each plot separately as a `config` parameter:
+
+```js
+Plotly.newPlot(graphDiv, data, layout, {locale: 'de-CH'})
+```
+
+# Bundle information
+
+The main plotly.js bundle includes all the official (non-beta) trace modules.
+
+It be can imported as minified javascript
+- using dist file `dist/plotly.min.js`
+- using CDN URL https://cdn.plot.ly/plotly-latest.min.js OR https://cdn.plot.ly/plotly-1.43.2.min.js
+
+or as raw javascript:
+- using the `plotly.js-dist` npm package (starting in `v1.39.0`)
+- using dist file `dist/plotly.js`
+- using CDN URL https://cdn.plot.ly/plotly-latest.js OR https://cdn.plot.ly/plotly-1.43.2.js
+- using CommonJS with `require('plotly.js')`
+
+If you would like to have access to the attribute meta information (including attribute descriptions as on the [schema reference page](https://plot.ly/javascript/reference/)), use dist file `dist/plotly-with-meta.js`
+
+The main plotly.js bundle weights in at:
+
+| plotly.js | plotly.min.js | plotly.min.js + gzip | plotly-with-meta.js |
+|-----------|---------------|----------------------|---------------------|
+| 6 MB | 2.8 MB | 843.5 kB | 6.3 MB |
+
+## Partial bundles
+
+Starting in `v1.15.0`, plotly.js also ships with several _partial_ bundles:
+
+- [scatter3d](#plotlyjs-scatter3d)
+
+Starting in `v1.39.0`, each plotly.js partial bundle has a corresponding npm package with no dependencies.
+### plotly.js scatter3d
+
+The `scatter3d` partial bundle contains trace modules `scatter`, `.lib/scatter3d` and `.lib/scatter3dpoint`.
+
+#### Stats
+
+| Raw size | Minified size | Minified + gzip size |
+|------|-----------------|------------------------|
+| 3.5 MB | 1.4 MB | 516.1 kB |
+
+#### CDN links
+
+| Flavor | URL |
+| ------ | --- |
+| Latest | https://cdn.plot.ly/plotly-scatter3d-latest.js |
+| Latest minified | https://cdn.plot.ly/plotly-scatter3d-latest.min.js |
+| Tagged | https://cdn.plot.ly/plotly-scatter3d-1.43.2.js |
+| Tagged minified | https://cdn.plot.ly/plotly-scatter3d-1.43.2.min.js |
+
+#### npm package (starting in `v1.39.0`)
+
+Install [`plotly.js-scatter3d-dist`](https://www.npmjs.com/package/plotly.js-scatter3d-dist) with
+```
+npm install plotly.js-scatter3d-dist
+```
+
+ES6 module usage:
+```js
+import Plotly from 'plotly.js-scatter3d-dist'
+```
+
+CommonJS usage:
+```js
+var Plotly = require('plotly.js-scatter3d-dist');
+```
+
+#### Other plotly.js entry points
+
+| Flavor | Location |
+|---------------|----------|
+| dist bundle | `dist/plotly-scatter3d.js` |
+| dist bundle (minified) | `dist/plotly-scatter3d.min.js` |
+| ES6 module | `import Plotly from 'plotly.js/lib/index-scatter3d'` |
+| CommonJS | `require('plotly.js/lib/index-scatter3d')` |
+
+
+----------------
+
+_This file is auto-generated by `npm run stats`. Please do not edit this file directly._

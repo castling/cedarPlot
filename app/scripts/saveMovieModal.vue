@@ -29,7 +29,9 @@
           </el-select>
         </el-form-item>
         <el-form-item label="frame rate">
-          <el-input-number v-model="param.framerate" :controls="false" :min="0"></el-input-number>
+          <el-input-number v-model="param.framerate" :controls="false" :min="0"
+            :disabled="!formats[param.format].framerate"
+          ></el-input-number>
         </el-form-item>
         <el-form-item label="movie quality">
           <el-input-number v-model="param.quality" :controls="false" :min="0" :max="100"

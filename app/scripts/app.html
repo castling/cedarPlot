@@ -159,27 +159,35 @@
             >
             <el-button type="primary">Select Data File</el-button>
           </el-upload>
+          <!--
+          <div class="form-control">
+            <el-input-number v-model="options.idColumn"
+              :max="maxColumns" controls-position="right">
+            </el-input-number>
+            <label class="form-label">ID Column</label>
+          </div>
+          -->
           <div class="form-control">
             <el-input-number v-model="options.columns.x"
-              :min="0" :max="options.maxColumns" controls-position="right">
+              :min="0" :max="maxColumns" controls-position="right">
             </el-input-number>
             <label class="form-label">X Column</label>
           </div>
           <div class="form-control">
             <el-input-number v-model="options.columns.y" label="Y Column"
-              :min="0" :max="options.maxColumns" controls-position="right">
+              :min="0" :max="maxColumns" controls-position="right">
             </el-input-number>
             <label class="form-label">Y Column</label>
           </div>
           <div class="form-control">
             <el-input-number v-model="options.columns.z" label="Z Column"
-              :min="0" :max="options.maxColumns" controls-position="right">
+              :min="0" :max="maxColumns" controls-position="right">
             </el-input-number>
             <label class="form-label">Z Column</label>
           </div>
           <div class="form-control">
             <el-input-number v-model="options.columns.v" label="Value Column"
-              :min="0" :max="options.maxColumns" controls-position="right">
+              :min="0" :max="maxColumns" controls-position="right">
             </el-input-number>
             <label class="form-label">Value Column</label>
           </div>

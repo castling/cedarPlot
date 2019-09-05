@@ -24,7 +24,7 @@
         <button type="button" class="el-button icon-step-forward"
           :class="{'is-disabled':!initialized}"
           :disabled="!initialized"
-          @click="step(options.time.max)" ></button>
+          @click="step(options.time.max-1)" ></button>
         <button type="button" class="el-button icon-spinner11" :class="{active:play.loop}"
           @click="play.loop = !play.loop" ></button>
       </div>
@@ -100,16 +100,16 @@
       </div>
       <div class="form-control__inline">
         <label>
-          <el-switch v-model="styles.marker.cauto" :disabled="!options.shadeMarker"></el-switch>
+          <el-switch v-model="styles.marker.cauto"></el-switch>
           <span class="form-label">AUTO RANGE</span>
         </label>
       </div>
       <div class="form-control">
-        <el-input-number v-model="styles.marker.cmin" :controls="false" :disabled="!options.shadeMarker||styles.marker.cauto"></el-input-number>
+        <el-input-number v-model="styles.marker.cmin" :controls="false" :disabled="styles.marker.cauto"></el-input-number>
         <label class="form-label">MIN VALUE</label>
       </div>
       <div class="form-control">
-        <el-input-number v-model="styles.marker.cmax" :controls="false" :disabled="!options.shadeMarker||styles.marker.cauto"></el-input-number>
+        <el-input-number v-model="styles.marker.cmax" :controls="false" :disabled="styles.marker.cauto"></el-input-number>
         <label class="form-label">MAX VALUE</label>
       </div>
       <div class="form-control">
@@ -140,18 +140,22 @@
       <template slot="title">
         <span>MARKER</span>
       </template>
+      <!--
       <div class="form-control">
         <el-input-number v-model="styles.marker.opacity" controls-position="right" :min="0" :max="1" :step="0.1"></el-input-number>
         <label class="form-label">OPACITY</label>
       </div>
+      -->
       <div class="form-control">
         <el-input-number v-model="styles.marker.size" controls-position="right" :min="0"></el-input-number>
         <label class="form-label">SIZE</label>
       </div>
+      <!--
       <div class="form-control color-picker-control">
         <el-color-picker v-model="styles.marker.line.color" show-alpha></el-color-picker>
         <label class="form-label">OUTLINE COLOR</label>
       </div>
+      -->
     </el-submenu>
 
     <el-submenu index="camera">

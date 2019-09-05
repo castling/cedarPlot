@@ -13,13 +13,13 @@ var ENV = process.env.npm_lifecycle_event;
 var isTest = ENV === 'test' || ENV === 'test-watch';
 var isProd = ENV === 'build';
 
-var port = 3333;
+var port = 3311;
 
 var config = {
   mode: isProd ? 'production' : 'development',
   cache: true,
 //  devtool: isTest ? 'inline-source-map' : isProd ? 'source-map' : 'source-map',
-  devtool: isTest ? 'inline-source-map' : 'eval',
+  devtool: isProd ? 'eval' : 'source-map',
 
   entry: {
     app: './app/index.js',
@@ -38,6 +38,9 @@ var config = {
         exclude: /node_modules/,
         loader: 'babel-loader',
         options: {
+          presets: [
+            '@babel/preset-env'
+          ],
           plugins: [
             'lodash',
             '@babel/plugin-syntax-dynamic-import',
@@ -75,6 +78,13 @@ var config = {
           },
         ],
       },
+      {
+        test: /\.glsl$/,
+        use: [
+          'raw-loader',
+          'glslify-loader',
+        ],
+      },
     ],
   },
   resolve: {
@@ -83,6 +93,7 @@ var config = {
       'vue$': 'vue/dist/vue.common.js',
       'vuex$': 'vuex/dist/vuex.common.js',
       'bootstrap-vue$': 'bootstrap-vue/dist/bootstrap-vue.common.js',
+      'glslify': 'glslify/index.js',
     },
   },
 
@@ -203,6 +214,7 @@ if( isProd ) {
 config.devServer = {
   contentBase: './',
   stats: 'minimal',
+//  stats: 'verbose',
   port: port,
 }
 

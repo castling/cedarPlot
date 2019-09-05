@@ -61,7 +61,7 @@ export default {
       hasStorage: false,
 
       loadedData: [],
-      data: [],
+      plotData: [],
       colors: [],
 
 			modalType: null,
@@ -83,7 +83,7 @@ export default {
         framerate: 2,
         quality: 100,
 
-        startStep: 0,
+        startStep: null,
         endStep: null,
         status: {
           total: 0,
@@ -148,7 +148,6 @@ export default {
           v: 4,
         },
         idColumn: 0,
-        maxColumns: Infinity,
         time: {
           value: 0,
           max: 0,
@@ -156,6 +155,7 @@ export default {
         fps: 2,
         shadeMarker: false,
       },
+      maxColumns: Infinity,
       config: {
         responsive: true,
         displaylogo: false,
@@ -243,6 +243,9 @@ export default {
       ],
 
       cameraSettings: [],
+
+      loadedDataChangeTime: 0,
+      plotDataChangeTime: 0,
     }
   },
   computed: {
@@ -254,22 +257,38 @@ export default {
     maxTimeStep() {
       return this.options.time.max + 1
     },
+    columns() {
+      return {
+        id: this.options.idColumn,
+        x: this.options.columns.x,
+        y: this.options.columns.y,
+        z: this.options.columns.z,
+        value: this.options.columns.v,
+      }
+    },
+    idColumn() {
+      return ( this.columns.id!=null && this.columns.id > -1 && this.columns.id < this.maxColumns ) ?
+        this.columns.id : -1
+    }
   },
   watch: {
-    loadedData: {
+    loadedDataChangeTime: {
       handler() {
         this.options.time.max = this.loadedData.length-1
-        this.options.maxColumns = Math.min.apply(null,this.loadedData.map(d=>{
-          return Math.min.apply(null,d.map(x=>x.length-1))
-        }))
+
+        'xyzv'.split('').forEach(d => {
+          this.options.columns[d] = Math.min(this.options.columns[d],this.maxColumns)
+        })
+
         this.setStep()
       },
-      deep: true,
     },
-    data: {
+    plotDataChangeTime: {
       handler() {
-        if( this.data.length ) {
+        if( this.plotData.length ) {
 //          this.options.maxColumns = Math.min.apply(null,this.data.map(d=>d.length-1))
+          this.maxColumns = this._loadedData.map(x=>x.length-1).reduce((a,b)=>Math.min(a,b),Infinity)
+
           this.setTraces()
           this.update()
           this.setValueRange()
@@ -280,7 +299,6 @@ export default {
           this.initialized = false
         }
       },
-      deep: true,
     },
     'options.time.value'() {
       this.setStep().then(() => {
@@ -293,21 +311,25 @@ export default {
       })
     },
     'options.columns.x'() {
+      this.changePlotData('x')
       this.setTraces()
       this.update()
       this.getCoordRange('x')
     },
     'options.columns.y'() {
+      this.changePlotData('y')
       this.setTraces()
       this.update()
       this.getCoordRange('y')
     },
     'options.columns.z'() {
+      this.changePlotData('z')
       this.setTraces()
       this.update()
       this.getCoordRange('z')
     },
     'options.columns.v'() {
+      this.changePlotData('value')
       this.setTraces()
       this.update()
       this.setValueRange()
@@ -460,12 +482,14 @@ export default {
     },
     colors: {
       handler() {
-        let markers = this.container.data.map(d=>d.marker)
-        let nums = markers.map((d,i)=>d.color!==this.colors[i]?i:false).filter(d=>d!==false)
-        if( !this.options.shadeMarker && nums.legth ) {
-          this.restyle({
-            'marker.color': this.nums.map(i=>this.colors[i]),
-          },nums)
+        if( !this.options.shadeMarker ) {
+          let markers = this.container.data.map(d=>d.marker)
+          let nums = markers.map((d,i)=>d.color!==this.colors[i]?i:false).filter(d=>d!==false)
+          if( nums.legth ) {
+            this.restyle({
+              'marker.color': this.nums.map(i=>this.colors[i]),
+            },nums)
+          }
         }
       },
       deep: true,
@@ -478,7 +502,6 @@ export default {
   },
   mounted() {
 window.app=this
-//window.Plotly=Plotly
     this.init().then(() => {
       this.setCameraWatches()
     })
@@ -490,10 +513,12 @@ window.app=this
 
       return this.ready = import(
         /* webpackChunkName: 'Plotly' */
-        'ify-loader!plotly.js/dist/plotly-gl3d'
+//        'ify-loader!@/plotly.js/dist/plotly-gl3d'
 //        'ify-loader!plotly.js/dist/plotly'
 //        'ify-loader!plotly.js/dist/plotly.min.js'
+        'ify-loader!./vendors/plotly.js/dist/plotly-scatter3d'
       ).then(({default: Plotly}) => {
+window.Plotly=Plotly
         this.Plotly = Plotly
         this.Plotly.newPlot('canvas',[],toPlain(this.layout), toPlain(this.config))
         this.container = this.$el.querySelector('#canvas')
@@ -529,16 +554,51 @@ window.app=this
     update() {
       let df = this.Plotly.redraw('canvas')
       df.then(() => {
-        this.$set(this,'colors',this.container._fullData.map(d=>d.marker.color))
+        this.$set(this,'colors',this.container.data.map(d=>d.marker.color))
         this.setValueRange()
         'xyz'.split('').forEach(x => this.getCoordRange(x))
       })
       return df
     },
+    getId(d) {
+      let n = ( this.columns.id!=null && this.columns.id > -1 && this.columns.id < maxColumns ) ?
+        this.columns.id : -1
+      return d[n]
+    },
+    setPlotData() {
+      let array = this._loadedData = this.reshapeStepData(this.loadedData[this.options.time.value||0] || [])
+      this.plotData = {}
+      array.forEach(d => {
+        let id = this.idColumn==-1 ? -1 : d[this.idColumn]
+        if( this.plotData[id]==null ) {
+          this.plotData[id] = {
+            x: [],
+            y: [],
+            z: [],
+            value: [],
+          }
+        }
+        this.plotData[id].x.push(d[this.columns.x])
+        this.plotData[id].y.push(d[this.columns.y])
+        this.plotData[id].z.push(d[this.columns.z])
+        this.plotData[id].value.push(d[this.columns.value])
+      })
+      this.plotDataChangeTime = Date.now()
+    },
+    changePlotData(name) {
+      let array = this._loadedData
+      Object.keys(this.plotData).forEach(id => {
+        this.plotData[id][name] = []
+      })
+      array.forEach(d=> {
+        let id = this.idColumn==-1 ? -1 : d[this.idColumn]
+        this.plotData[id][name].push(d[this.columns[name]])
+      })
+    },
     setStep() {
       return new Promise((resolve,reject) => {
-        this.data = this.loadedData[ this.options.time.value || 0 ] || []
-        if( this.data.length ) {
+        this.setPlotData()
+        if( Object.keys(this.plotData).length ) {
           this.setTraces()
           let df = this.update()
           setTimeout(() => {
@@ -572,7 +632,7 @@ window.app=this
     },
     setTraces() {
       let traces = this.container.data
-      let ids = uniq(this.data.map(d=>d[this.options.idColumn]))
+      let ids = Object.keys(this.plotData)
       ids.forEach(id => {
         let num = traces.findIndex(d=>d.id===id)
         let trace = traces[num]
@@ -581,7 +641,7 @@ window.app=this
           traces.push(trace = {
             id: id,
             name: `id:${id}`,
-            type: 'scatter3d',
+            type: 'scatter3dpoint',
             x: [],
             y: [],
             z: [],
@@ -590,11 +650,11 @@ window.app=this
             marker: toPlain(this.style.marker),
           })
         }
-        let data = this.data.filter(d=>d[this.options.idColumn]===id)
-        trace.x = data.map(d=>d[this.options.columns.x])
-        trace.y = data.map(d=>d[this.options.columns.y])
-        trace.z = data.map(d=>d[this.options.columns.z])
-        trace.marker.color = this.options.shadeMarker ?  data.map(d=>d[this.options.columns.v]) : this.colors[num]
+        let data = this.plotData[id]
+        trace.x = data.x
+        trace.y = data.y
+        trace.z = data.z
+        trace.marker.color = this.options.shadeMarker ?  data.value : this.colors[num]
       })
       if( traces.length ) {
         traces[0].marker.showscale = this.options.shadeMarker
@@ -603,8 +663,7 @@ window.app=this
     setTraceColor() {
       this.container.data.forEach(trace => {
         trace.marker.color = this.options.shadeMarker ?
-          this.data.filter(d=>d[this.options.idColumn]===trace.id).map(d=>d[this.options.columns.v]) :
-          trace.marker.color = null
+          this.plotData[trace.id].value : null
       })
       return this.update()
     },
@@ -612,12 +671,13 @@ window.app=this
       if( this.style.marker.cauto ) {
         let cmin = Infinity
         let cmax = -Infinity
-        this.data.forEach(d => {
-          let v = d[this.options.columns.v]
-          if( isNumber(v) ) {
-            cmin = Math.min(v,cmin)
-            cmax = Math.max(v,cmax)
-          }
+        Object.keys(this.plotData).forEach(id => {
+          this.plotData[id].value.forEach(v => {
+            if( isNumber(v) ) {
+              cmin = Math.min(v,cmin)
+              cmax = Math.max(v,cmax)
+            }
+          })
         })
         this.style.marker.cmin = cmin
         this.style.marker.cmax = cmax
@@ -660,37 +720,58 @@ window.app=this
     setDatafile(file) {
       this.$refs.upload.clearFiles()
       this.loadingState.run = true
+      let lines = [ '' ]
+      let times = []
       getFileData(file.raw).progress(res=>{
         this.loadingState.percentage = res.percentage
+
+        let tmp = res.value.split('\n')
+        lines[lines.length-1] += tmp[0]
+        if( tmp.length>1 ) {
+          lines = lines.concat(tmp.slice(1))
+        }
+
       }).then(res=>{
         this.loadingState.status = 'success'
         this.loadingState.percentage = 100
 
         this.$nextTick(() => {
-          let loadedData = this.reshapeData(res)
+          this.loadedData = this.reshapeData(lines)
           setTimeout(() => {
-            this.loadedData = loadedData
+            this.loadedDataChangeTime = Date.now()
             this.$nextTick(() => {
               this.loadingState.run = false
               this.loadingState.status = null
               this.loadingState.percentage = 0
             })
-          },600)
+          },100)
         })
       })
     },
-    reshapeData(data) {
-      let res = [[]]
+    reshapeData(lines) {
+      lines = lines.slice(0,-1)
       let n = 0
-      data.split('\n').map(d=>compact(d.split(/[ \t]+/)).map(d=>Number(d))).forEach(d=> {
-        if( d.length===1 && res[n].length ) {
-          n++
-          res[n] = []
-        } else if( d.length>1 ) {
-          res[n].push(d)
-        }
-      })
+      console.log('text lines :',lines.length)
+
+      let l = 0
+      let times = []
+      let num = Number(lines[l])
+      while( l+num < lines.length ) {
+        times.push(lines.slice(l+2,l+2+num))
+        l += num + 2
+        num = Number(lines[l]||0)
+      }
+      console.log('time steps :',times.length)
+      return times
+    },
+    reshapeStepData(data) {
+      let res = []
+      for( let i=0; i<data.length; i++ ) {
+        res[i] = data[i].replace(/[ \t]+$/,'').split(/[ \t]+/).map(d=>Number(d))
+      }
       return res
+
+//      return times.map(lines => lines.map(line => line.replace(/[ \t]+$/,'').split(/[ \t]+/).map(d=>Number(d))))
     },
     clearUploadFile() {
       this.$refs.upload.clearFiles()
@@ -725,8 +806,11 @@ window.app=this
       this.modalType = 'saveImage'
     },
     openSaveMovieModal() {
+      if( this.saveMovieParam.startStep == null ) {
+        this.saveMovieParam.startStep = 0
+      }
       if( this.saveMovieParam.endStep == null ) {
-        this.saveMovieParam.endStep = this.options.time.max
+        this.saveMovieParam.endStep = this.options.time.max - 1
       }
       this.modalType = 'saveMovie'
     },
@@ -746,7 +830,7 @@ window.app=this
         message: 'adding images',
       })
 
-      let filename = this.saveMovieParam.filename + '.' + this.saveMovieParam.format
+      let filename = this.saveMovieParam.filename + '.' + this.saveMovieFormats[this.saveMovieParam.format].ext
 
       this.saveService = new saveAnimService({
         filename,
@@ -843,7 +927,9 @@ window.app=this
       this.saveStorage('camera',this.cameraSettings)
     },
     loadCameraSetting(name) {
-      this.$set(this.layout.scene,'camera', this.cameraSettings.find(d => d.name === name ).camera)
+      this.$set(this.layout.scene.camera,'up', this.cameraSettings.find(d => d.name === name ).camera.up)
+      this.$set(this.layout.scene.camera,'center', this.cameraSettings.find(d => d.name === name ).camera.center)
+      this.$set(this.layout.scene.camera,'eye', this.cameraSettings.find(d => d.name === name ).camera.eye)
     },
     removeCameraSetting(name) {
       let n = this.cameraSettings.findIndex(d => d.name === name )
