@@ -10,6 +10,10 @@ import saveAnimService from './saveAnimService/index.js'
 import saveMovieFormats from './saveAnimService/filetypes.js'
 import colorPalettes from './colorPalettes.js'
 import colorScales from './colorScales.js'
+import blockReader from './blockReader.js'
+import getMimetype from './getMimetype.js'
+import concatData from './concatData.js'
+import timerAsync from './timerAsync.js'
 
 /*
 import ElContainer from 'element-ui/lib/container.js'
@@ -286,6 +290,7 @@ export default {
     plotDataChangeTime: {
       handler() {
         if( this.plotData.length ) {
+console.log('plotDataChangeTime')
 //          this.options.maxColumns = Math.min.apply(null,this.data.map(d=>d.length-1))
           this.maxColumns = this._loadedData.map(x=>x.length-1).reduce((a,b)=>Math.min(a,b),Infinity)
 
@@ -335,22 +340,26 @@ export default {
       this.setValueRange()
     },
     'layout.scene.aspectmode'(mode) {
+console.log('scene.aspectmode')
       this.relayout('scene.aspectmode',mode)
     },
     'layout.scene.aspectratio.x': {
       handler(d) {
+console.log('scene.aspectratio.x')
         this.relayout('scene.aspectratio.x',d)
       },
       deep: true,
     },
     'layout.scene.aspectratio.y': {
       handler(d) {
+console.log('scene.aspectratio.y')
         this.relayout('scene.aspectratio.y',d)
       },
       deep: true,
     },
     'layout.scene.aspectratio.z': {
       handler(d) {
+console.log('scene.aspectratio.z')
         this.relayout('scene.aspectratio.z',d)
       },
       deep: true,
@@ -382,45 +391,24 @@ export default {
       },
       deep: true,
     },
-    'layout.scene.camera.center': {
-      handler(d) {
-        if( this.container && this.container.layout.scene && this.container.layout.scene.camera.center ) {
-          let org = this.container.layout.scene.camera.center || {}
-          if( d.x!==org.x || d.y!==org.y || d.z!==org.z ) {
+    'layout.scene.camera': {
+      handler(camera) {
+        if( this.container &&
+          this.container._fullLayout &&
+          this.container._fullLayout.scene &&
+          this.container._fullLayout.scene.camera ) {
+          let org = this.container._fullLayout.scene.camera
+          if( camera.center.x!=org.center.x ||
+            camera.center.y!=org.center.y ||
+            camera.center.z!=org.center.z ||
+            camera.eye.x!=org.eye.x ||
+            camera.eye.y!=org.eye.y ||
+            camera.eye.z!=org.eye.z ||
+            camera.up.x!=org.up.x ||
+            camera.up.y!=org.up.y ||
+            camera.up.z!=org.up.z ) {
             this.relayout({
-              'scene.camera.center.x': d.x,
-              'scene.camera.center.y': d.y,
-              'scene.camera.center.z': d.z,
-            })
-          }
-        }
-      },
-      deep: true,
-    },
-    'layout.scene.camera.eye': {
-      handler(d) {
-        if( this.container && this.container.layout.scene && this.container.layout.scene.camera.eye ) {
-          let org = this.container.layout.scene.camera.eye || {}
-          if( d.x!==org.x || d.y!==org.y || d.z!==org.z ) {
-            this.relayout({
-              'scene.camera.eye.x': d.x,
-              'scene.camera.eye.y': d.y,
-              'scene.camera.eye.z': d.z,
-            })
-          }
-        }
-      },
-      deep: true,
-    },
-    'layout.scene.camera.up': {
-      handler(d) {
-        if( this.container && this.container.layout.scene && this.container.layout.scene.camera.up ) {
-          let org = this.container.layout.scene.camera.up || {}
-          if( d.x!==org.x || d.y!==org.y || d.z!==org.z ) {
-            this.relayout({
-              'scene.camera.up.x': d.x,
-              'scene.camera.up.y': d.y,
-              'scene.camera.up.z': d.z,
+              'scene.camera': camera,
             })
           }
         }
@@ -485,11 +473,9 @@ export default {
         if( !this.options.shadeMarker ) {
           let markers = this.container.data.map(d=>d.marker)
           let nums = markers.map((d,i)=>d.color!==this.colors[i]?i:false).filter(d=>d!==false)
-          if( nums.legth ) {
-            this.restyle({
-              'marker.color': this.nums.map(i=>this.colors[i]),
-            },nums)
-          }
+          this.restyle({
+            'marker.color': nums.map(i=>this.colors[i]),
+          },nums)
         }
       },
       deep: true,
@@ -508,6 +494,7 @@ window.app=this
   },
   methods: {
     init() {
+      this._restyleQue = []
       this.hasStorage = !!window.localStorage
       this.initCameraSettings()
 
@@ -545,18 +532,52 @@ window.Plotly=Plotly
     resizeHandler() {
       this.Plotly.Plots.resize('canvas')
     },
-    restyle(...opt) {
-      this.Plotly.restyle('canvas',...opt)
+    restyle(opt,index) {
+      let num = 0
+      if( opt ) {
+        num = this._restyleQue.findIndex(d => JSON.stringify(d.index)==JSON.stringify(index))
+        num = num==-1 ? this._restyleQue.length : num
+      }
+
+      this._restyleQue[num] = {
+        option: {
+          ...((this._restyleQue[num]||{}).option||{}),
+          ...(opt||{}),
+        },
+        index,
+      }
+
+      if( !this._restyling ) {
+        this._restyling = true
+        let queue = this._restyleQue.splice(num,1)[0]
+console.log('restyle')
+console.time('restyle')
+        this.Plotly.restyle('canvas',queue.option,queue.index).then(() => {
+console.timeEnd('restyle')
+          this._restyling = false
+          if( this._restyleQue.length ) {
+            this.restyle()
+          }
+        })
+      }
+
     },
     relayout(...opt) {
-      this.Plotly.relayout('canvas',...opt);
+console.log('relayout')
+console.time('relayout')
+      this.Plotly.relayout('canvas',...opt).then(() => {
+console.timeEnd('relayout')
+      })
     },
     update() {
+console.log('update')
+console.time('update')
       let df = this.Plotly.redraw('canvas')
       df.then(() => {
         this.$set(this,'colors',this.container.data.map(d=>d.marker.color))
         this.setValueRange()
         'xyz'.split('').forEach(x => this.getCoordRange(x))
+console.timeEnd('update')
       })
       return df
     },
@@ -566,6 +587,8 @@ window.Plotly=Plotly
       return d[n]
     },
     setPlotData() {
+console.log('setPlotData')
+console.time('setPlotData')
       let array = this._loadedData = this.reshapeStepData(this.loadedData[this.options.time.value||0] || [])
       this.plotData = {}
       array.forEach(d => {
@@ -584,8 +607,11 @@ window.Plotly=Plotly
         this.plotData[id].value.push(d[this.columns.value])
       })
       this.plotDataChangeTime = Date.now()
+console.timeEnd('setPlotData')
     },
     changePlotData(name) {
+console.log('changePlotData')
+console.time('changePlotData')
       let array = this._loadedData
       Object.keys(this.plotData).forEach(id => {
         this.plotData[id][name] = []
@@ -594,25 +620,33 @@ window.Plotly=Plotly
         let id = this.idColumn==-1 ? -1 : d[this.idColumn]
         this.plotData[id][name].push(d[this.columns[name]])
       })
+console.timeEnd('changePlotData')
     },
     setStep() {
-      return new Promise((resolve,reject) => {
-        this.setPlotData()
-        if( Object.keys(this.plotData).length ) {
-          this.setTraces()
-          let df = this.update()
-          setTimeout(() => {
-            df.then(() => {
+console.log('setStep')
+console.time('setStep')
+      return Promise.all([
+        timerAsync(1000/this.options.fps),
+        new Promise((resolve,reject) => {
+          this.setPlotData()
+          if( Object.keys(this.plotData).length ) {
+            this.setTraces()
+
+console.log(this.options.fps)
+            this.update().then(() => {
               this.initialized = true
+console.timeEnd('setStep')
               resolve()
             })
-          },1000/this.options.fps)
-        } else {
-          reject()
-        }
-      })
+          } else {
+            reject()
+          }
+        }),
+      ])
     },
     setTimeStep(t) {
+console.log('setTimeStep')
+console.time('setTimeStep')
       if( t < 0 ) {
         if( this.animation.loop ) {
           t += (Math.floor( -t / this.maxTimeStep )+1) * this.maxTimeStep
@@ -629,8 +663,11 @@ window.Plotly=Plotly
         }
       }
       this.options.time.value = t
+console.timeEnd('setTimeStep')
     },
     setTraces() {
+console.log('setTraces')
+console.time('setTraces')
       let traces = this.container.data
       let ids = Object.keys(this.plotData)
       ids.forEach(id => {
@@ -659,15 +696,21 @@ window.Plotly=Plotly
       if( traces.length ) {
         traces[0].marker.showscale = this.options.shadeMarker
       }
+console.timeEnd('setTraces')
     },
     setTraceColor() {
+console.log('setTraceColor')
+console.time('setTraceColor')
       this.container.data.forEach(trace => {
         trace.marker.color = this.options.shadeMarker ?
           this.plotData[trace.id].value : null
       })
+console.timeEnd('setTraceColor')
       return this.update()
     },
     setValueRange() {
+console.log('setValueRange')
+console.time('setValueRange')
       if( this.style.marker.cauto ) {
         let cmin = Infinity
         let cmax = -Infinity
@@ -679,8 +722,12 @@ window.Plotly=Plotly
             }
           })
         })
-        this.style.marker.cmin = cmin
-        this.style.marker.cmax = cmax
+        if( cmin != Infinity ) {
+          this.style.marker.cmin = cmin
+        }
+        if( cmax != -Infinity ) {
+          this.style.marker.cmax = cmax
+        }
 /*
         this.restyle({
           'marker.cmin': this.style.marker.cmin,
@@ -688,66 +735,127 @@ window.Plotly=Plotly
         })
 */
       }
+console.timeEnd('setValueRange')
     },
     getCoordRange(x) {
+console.log('getCoordRange')
+console.time('getCoordRange')
       if( this.layout.scene[`${x}axis`].autorange && this.container._fullLayout.scene ) {
         this.layout.scene[`${x}axis`].range = this.container._fullLayout.scene[x+'axis'].range
       }
+console.timeEnd('getCoordRange')
     },
     setAxisAuto(x,auto) {
+console.log('setAxisAuto')
+console.time('setAxisAuto')
       if( this.container._fullLayout.scene ) {
+console.log('scene.'+x+'axis.autorange')
         this.relayout({
           [`scene.${x}axis.autorange`]: auto,
         })
         if( auto ) {
           this.getCoordRange(x)
         } else {
+console.log('scene.'+x+'axis.range')
           this.relayout({
             [`scene.${x}axis.range`]: this.layout.scene[`${x}axis`].range,
           })
         }
       }
+console.timeEnd('setAxisAuto')
     },
     setAxisRange(x,range) {
+console.log('setAxisRange')
+console.time('setAxisRange')
       if( this.container && this.container._fullLayout.scene ) {
         if( !this.layout.scene[`${x}axis`].autorange ) {
+console.log('scene.'+x+'axis.range')
           this.relayout({
             [`scene.${x}axis.range`]: range,
           })
         }
       }
+console.timeEnd('setAxisRange')
     },
     setDatafile(file) {
+console.log('setDatafile')
+console.time('setDatafile')
       this.$refs.upload.clearFiles()
       this.loadingState.run = true
-      let lines = [ '' ]
-      let times = []
-      getFileData(file.raw).progress(res=>{
-        this.loadingState.percentage = res.percentage
 
-        let tmp = res.value.split('\n')
-        lines[lines.length-1] += tmp[0]
-        if( tmp.length>1 ) {
-          lines = lines.concat(tmp.slice(1))
+console.time('load')
+      blockReader(0,150,file.raw,e => {
+        let isBinary
+        if( e.target.error==null ) {
+          let mimetype = getMimetype(e.target.result)
+          isBinary = mimetype != 'text/plain'
+        } else {
+          console.log('read error:'+e.target.error)
         }
+        let results = isBinary ? new ArrayBuffer() : []
 
-      }).then(res=>{
-        this.loadingState.status = 'success'
-        this.loadingState.percentage = 100
+        getFileData(file.raw,null,isBinary).progress(res=>{
+          this.loadingState.percentage = res.percentage
 
-        this.$nextTick(() => {
-          this.loadedData = this.reshapeData(lines)
-          setTimeout(() => {
-            this.loadedDataChangeTime = Date.now()
-            this.$nextTick(() => {
-              this.loadingState.run = false
-              this.loadingState.status = null
-              this.loadingState.percentage = 0
-            })
-          },100)
+//          results.push(res.value)
+          results = isBinary ? concatData(results,res.value,isBinary) : [...results, res.value]
+          /*
+          let tmp = res.value.split('\n')
+          lines[lines.length-1] += tmp[0]
+          if( tmp.length>1 ) {
+            lines = lines.concat(tmp.slice(1))
+          }
+          */
+
+        }).then(res=>{
+console.timeEnd('load')
+          this.loadingState.status = 'success'
+          this.loadingState.percentage = 100
+          this.$nextTick(() => {
+            this.loadedData = this.reshapeData(results,isBinary)
+            setTimeout(() => {
+              this.loadedDataChangeTime = Date.now()
+              this.$nextTick(() => {
+                this.loadingState.run = false
+                this.loadingState.status = null
+                this.loadingState.percentage = 0
+console.timeEnd('setDatafile')
+              })
+            },100)
+          })
         })
-      })
+      },true)
     },
+    reshapeData(results,binaryFlag) {
+console.log('reshape')
+console.time('reshape')
+      if( !binaryFlag ) {
+        let lines = results.reduce((lines,value) => {
+          let x = value.split('\n')
+          return [
+            ...lines.slice(0,-1),
+            lines.slice(-1)[0]+x[0],
+            ...x.slice(1),
+          ]
+        },['']).filter(d=>d&&d!='')
+
+        console.log('text lines :',lines.length)
+        let l = 0
+        let times = []
+        let num = Number(lines[l])
+        while( l+num <= lines.length ) {
+          times.push(lines.slice(l+2,l+2+num))
+          l += num + 2
+          num = Number(lines[l]||0)
+        }
+        console.log('time steps :',times.length)
+console.timeEnd('reshape')
+        return times
+      } else {
+console.log(results)
+      }
+    },
+    /**
     reshapeData(lines) {
       lines = lines.slice(0,-1)
       let n = 0
@@ -764,16 +872,23 @@ window.Plotly=Plotly
       console.log('time steps :',times.length)
       return times
     },
+    */
     reshapeStepData(data) {
+console.log('reshapeStepData')
+console.time('reshapeStepData')
       let res = []
-      for( let i=0; i<data.length; i++ ) {
+      for( let i=0; i < data.length; i++ ) {
         res[i] = data[i].replace(/[ \t]+$/,'').split(/[ \t]+/).map(d=>Number(d))
       }
+console.timeEnd('reshapeStepData')
       return res
 
 //      return times.map(lines => lines.map(line => line.replace(/[ \t]+$/,'').split(/[ \t]+/).map(d=>Number(d))))
     },
     clearUploadFile() {
+console.log('clearUploadFile')
+console.time('clearUploadFile')
+console.timeEnd('clearUploadFile')
       this.$refs.upload.clearFiles()
     },
     setEvent() {
@@ -798,9 +913,12 @@ window.Plotly=Plotly
       this.colorParam.color = color.hex
     },
     updateColor() {
+console.log('updateColor')
+console.time('updateColor')
       let num = this.container._fullData.findIndex(d=>d.name===this.colorParam.name)
       this.$set(this.colors,num,this.colorParam.color)
       this.modalType = null
+console.timeEnd('updateColor')
     },
     openSaveImageModal() {
       this.modalType = 'saveImage'

@@ -12,6 +12,7 @@
   "author": "Takeshi Sugimura <unvodka@gmail.com>",
   "license": "MIT",
   "dependencies": {
+    "@babel/runtime": "^7.11.2",
     "bootstrap-colorpicker": "^2.5.1",
     "bootstrap-vue": "^2.0.0-rc.11",
     "element-ui": "^2.4.9",
@@ -35,7 +36,9 @@
   "devDependencies": {
     "@babel/core": "^7.1.2",
     "@babel/plugin-syntax-dynamic-import": "^7.0.0",
+    "@babel/plugin-transform-runtime": "^7.11.5",
     "@babel/preset-env": "^7.2.3",
+    "@babel/preset-es2015": "^7.0.0-beta.53",
     "babel-loader": "^8.0.4",
     "babel-plugin-lodash": "^3.3.4",
     "copy-webpack-plugin": "^4.5.4",
@@ -49,7 +52,7 @@
     "html-webpack-plugin": "^3.2.0",
     "ify-loader": "^1.1.0",
     "lodash-webpack-plugin": "^0.11.5",
-    "node-sass": "^4.9.4",
+    "node-sass": "^4.14.1",
     "raw-loader": "^0.5.1",
     "sass-loader": "^7.1.0",
     "style-loader": "^0.23.1",

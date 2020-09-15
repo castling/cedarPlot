@@ -1,12 +1,15 @@
 import Promise from 'progress-promise'
 import getChunkFileData from './getChunkFileData.js'
+import concatData from './concatData.js'
 
-export default (file,callback) => {
-  let txt = []
+export default (file,callback,isBinaryReader) => {
+  let result = isBinaryReader ? new ArrayBuffer() : []
+console.log(file)
   return new Promise((resolve,reject,progress) => {
-    getChunkFileData(file)
+    getChunkFileData(file,null,null,isBinaryReader)
       .progress(res => {
-        txt.push(res.value)
+        result = concatData(result,res.value,isBinaryReader)
+
         progress({
           state: res.state,
           percentage: res.percentage,
@@ -14,10 +17,9 @@ export default (file,callback) => {
         })
       })
       .then(() => {
-        resolve(txt)
+        resolve(result)
       },e=> {
         reject(e)
       })
   })
 }
-

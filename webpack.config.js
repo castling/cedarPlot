@@ -39,11 +39,12 @@ var config = {
         loader: 'babel-loader',
         options: {
           presets: [
-            '@babel/preset-env'
+            '@babel/preset-env',
           ],
           plugins: [
             'lodash',
             '@babel/plugin-syntax-dynamic-import',
+//            '@babel/plugin-transform-runtime',
           ],
         },
       },

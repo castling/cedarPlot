@@ -1,6 +1,7 @@
 import Promise from 'progress-promise'
+import blockReader from './blockReader.js'
 
-export default (file,callback,finishCallback) => {
+export default (file,callback,finishCallback,binaryRead) => {
   var fileSize = file.size
   var chunkSize = 1024 * 1024
   var offset = 0
@@ -24,16 +25,9 @@ export default (file,callback,finishCallback) => {
         return
       }
 
-      blockReader(offset,chunkSize,file)
+      blockReader(offset,chunkSize,file,onload,binaryRead)
     }
 
-    let blockReader = (_offset,_length,_file) => {
-      let reader = new FileReader()
-      let blob = _file.slice(_offset,_length+_offset)
-      reader.onload = onload
-      reader.readAsText(blob)
-    }
-
-    blockReader(offset,length,file)
+    blockReader(offset,length,file,onload,binaryRead)
   })
 }
